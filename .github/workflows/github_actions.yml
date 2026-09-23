@@ -54,6 +54,7 @@ jobs:
             cc: gcc
             blas: "libopenblas64-openmp-dev"
             blas_size: 8
+            use_dftd4: 1
           - os: ubuntu-22.04
             experimental: true
             mpi_impl: openmpi
@@ -415,6 +416,7 @@ jobs:
             cc: gcc
             blas: "brew_openblas"
             blas_size: 4
+            use_dftd4: 1
           - os: macos-latest
             experimental: true
             mpi_impl: openmpi
@@ -433,6 +435,7 @@ jobs:
       USE_SIMINT: ${{ matrix.use_simint }}
       USE_LIBXC: ${{ matrix.use_libxc }}
       USE_TBLITE: ${{ matrix.use_tblite }}
+      USE_DFTD4: ${{ matrix.use_dftd4 }}
       BUILD_PLUMED: ${{ matrix.build_plumed }}
       FC: ${{ matrix.fc }}
       CC: ${{ matrix.cc }}

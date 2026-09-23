@@ -167,3 +167,7 @@ DFTD4 evaluation occurs only on Global Arrays rank zero; energy and gradient dat
 - `src/nwdft/libxc/nwchem_libxc_util.F`: LibXC functional-name handoff.
 - `src/nwdft/input_dft/dft_input.F`: `dftd4 on|off` parsing.
 - Molecular DFT SCF, gradient, and task Hessian call sites contain the optional integration hooks.
+
+## Development attribution
+
+This interface was developed with assistance from OpenAI Codex and subsequently reviewed and numerically validated by the author.

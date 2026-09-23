@@ -28,7 +28,6 @@ fi
 echo NWCHEM_TOP is $NWCHEM_TOP
 #TARBALL=https://github.com/nwchemgit/nwchem/releases/download/v7.0.0-beta1/nwchem-7.0.0-release.revision-5bcf0416-src.2019-11-01.tar.bz2
 export USE_MPI=y
-export USE_DFTD4=1
 export MPICH_INTERFACE_HOSTNAME=localhost # fix for Mpich interface errors
 #export USE_HWOPT=n  # disable HW optimizations
 if [[ "$FC" == *'flang'* ]] || [[ "$FC" == *'nvfortran'* ]]; then

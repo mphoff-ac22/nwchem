@@ -1026,6 +1026,7 @@ c
       goto 10
 c
  4950 continue
+c     DFTD4 input integration added with assistance from OpenAI Codex.
 #ifdef USE_DFTD4
       if (.not.inp_a(test))
      & call errquit('DFTD4 requires ON or OFF',0,INPUT_ERR)

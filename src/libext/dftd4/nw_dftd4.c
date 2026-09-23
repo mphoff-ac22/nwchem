@@ -1,3 +1,6 @@
+/* DFTD4 interface for NWChem.
+ * Developed with assistance from OpenAI Codex; implementation and numerical
+ * validation were reviewed by the author. */
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>

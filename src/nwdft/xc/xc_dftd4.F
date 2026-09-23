@@ -1,3 +1,5 @@
+c     DFTD4 interface developed with assistance from OpenAI Codex;
+c     implementation and numerical validation were reviewed by the author.
       subroutine xc_dftd4(rtdb,geom,value,gradient,what)
       implicit none
 #include "errquit.fh"

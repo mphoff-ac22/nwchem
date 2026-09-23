@@ -3713,6 +3713,12 @@ endif
 
 
 #TBLITE
+ifdef USE_DFTD4
+    ifdef USE_TBLITE
+        $(error USE_DFTD4 and USE_TBLITE cannot be enabled together)
+    endif
+endif
+
 ifeq ("$(wildcard $(NWCHEM_TOP)/src/config/NWCHEM_CONFIG)","")
     ifeq (xtb, $(findstring xtb, $(NWCHEM_MODULES)))
         MODULES_HAS_XTB=Y
@@ -3741,13 +3747,12 @@ ifdef USE_TBLITE
     EXTRA_LIBS += $(LAPACK_LIB) $(BLASOPT)
 endif
 
-# DFTD4.  Its symbols are isolated in libnwc_dftd4.so so this can coexist
-# with the older DFTD4 Fortran library required by tblite.
+# DFTD4 integration developed with assistance from OpenAI Codex.
 ifdef USE_DFTD4
     DEFINES += -DUSE_DFTD4
-    EXTRA_LIBS += -L$(LIBDIR) -lnwc_dftd4
-    LDOPTIONS += -Wl,-rpath,'$$ORIGIN/../../lib/$(TARGET)' \
-                 -Wl,--exclude-libs,libnwc_openblas.a
+    DFTD4_LIBDIR = $(NWCHEM_TOP)/src/libext/dftd4/install/lib
+    EXTRA_LIBS += -L$(LIBDIR) -lnwc_dftd4 -L$(DFTD4_LIBDIR) \
+                  -ldftd4 -lmulticharge -lmctc-lib -lmstore
 endif
 
 # CUDA

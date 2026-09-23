@@ -1,4 +1,0 @@
-{
-  global: nw_dftd4_eval_;
-  local: *;
-};

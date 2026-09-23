@@ -225,6 +225,7 @@ C MGGAs are not ready for 3rd derivatives
 
       end subroutine
 
+c     DFTD4 LibXC adapter added with assistance from OpenAI Codex.
       subroutine nwchem_libxc_dftd4_names(name1,name2,nfunc,status)
       use,intrinsic :: iso_c_binding
 #ifdef USE_LIBXC
