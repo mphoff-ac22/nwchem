@@ -256,7 +256,7 @@
 #include "rtdb.fh"
 #include "mafdecls.fh"
 #include "cdft.fh"
-      integer rtdb,mlen,i,nlibxc,libxc_status
+      integer rtdb,mlen,i,nlibxc,libxc_status,native_status
       character*(*) method
       character*128 name1,name2,spec
       method=' '
@@ -337,14 +337,27 @@ c     canonical DFTD4 parameter name are mapped explicitly.
       elseif (xccomb(86)) then
          method='r2scan0'
       else
-c        A single NWChem XC keyword can be passed directly. DFTD4
-c        performs
-c        the final parameter lookup and reports unsupported functionals.
+c        Native NWChem X/C pairs use the original specification so
+c        omitted and explicit unit coefficients are equivalent.
          spec=' '
          if (.not.rtdb_cget(rtdb,'dft:xc_spec',1,spec))
      &      call errquit('DFTD4 could not identify the XC functional',
      &                   0,INPUT_ERR)
          call xc_dftd4_lower(spec)
+         call xc_dftd4_native_pair(spec,method,native_status)
+         if (native_status.eq.2)
+     &      call errquit('DFTD4 cannot use scaled native X/C terms',
+     &                   0,INPUT_ERR)
+         if (native_status.lt.0)
+     &      call errquit('DFTD4 cannot map this native X/C pair',
+     &                   0,INPUT_ERR)
+         if (native_status.eq.1) then
+            mlen=len_trim(method)
+            return
+         endif
+c        A single NWChem XC keyword can be passed directly. DFTD4
+c        performs
+c        the final parameter lookup and reports unsupported functionals.
          method=adjustl(spec)
          do i=1,len_trim(method)
             if (method(i:i).eq.' '.or.method(i:i).eq.char(9))
@@ -354,6 +367,143 @@ c        the final parameter lookup and reports unsupported functionals.
          enddo
       endif
       mlen=len_trim(method)
+      return
+      end
+
+      subroutine xc_dftd4_native_pair(spec,method,status)
+      implicit none
+      character*(*) spec,method
+      character*64 word(4),name(2)
+      integer status,nword,nname,i,j,ios
+      double precision coeff(2),value,eps
+      logical xc_dftd4_native_names
+      external xc_dftd4_native_names
+      parameter (eps=1.0d-12)
+
+      method=' '
+      do i=1,4
+         word(i)=' '
+      enddo
+      nword=0
+      i=1
+ 10   if (i.gt.len_trim(spec)) goto 30
+      if (spec(i:i).eq.' '.or.spec(i:i).eq.char(9)) then
+         i=i+1
+         goto 10
+      endif
+      if (nword.eq.4) then
+         status=0
+         return
+      endif
+      nword=nword+1
+      j=i
+ 20   if (j.le.len_trim(spec)) then
+         if (spec(j:j).ne.' '.and.spec(j:j).ne.char(9)) then
+            j=j+1
+            goto 20
+         endif
+      endif
+      word(nword)=spec(i:j-1)
+      i=j+1
+      goto 10
+
+ 30   nname=0
+      coeff(1)=1.0d0
+      coeff(2)=1.0d0
+      do i=1,nword
+         read(word(i),*,iostat=ios) value
+         if (ios.eq.0) then
+            if (nname.lt.1.or.nname.gt.2) then
+               status=0
+               return
+            endif
+            coeff(nname)=value
+         else
+            nname=nname+1
+            if (nname.gt.2) then
+               status=0
+               return
+            endif
+            name(nname)=word(i)
+         endif
+      enddo
+      status=0
+      if (nname.ne.2) return
+      if (abs(coeff(1)-1.0d0).gt.eps.or.
+     &    abs(coeff(2)-1.0d0).gt.eps) then
+         status=2
+         return
+      endif
+
+      status=1
+      if (xc_dftd4_native_names(name(1),name(2),'becke88','lyp')) then
+         method='blyp'
+      elseif (xc_dftd4_native_names(name(1),name(2),
+     &                              'becke88','perdew86')) then
+         method='bp86'
+      elseif (xc_dftd4_native_names(name(1),name(2),
+     &                              'becke88','perdew91')) then
+         method='bpw'
+      elseif (xc_dftd4_native_names(name(1),name(2),
+     &                              'becke88','cpbe96')) then
+         method='bpbe'
+      elseif (xc_dftd4_native_names(name(1),name(2),'mpw91','lyp')) then
+         method='mpwlyp'
+      elseif (xc_dftd4_native_names(name(1),name(2),
+     &                              'mpw91','perdew91')) then
+         method='mpwpw91'
+      elseif (xc_dftd4_native_names(name(1),name(2),
+     &                              'xpbe96','cpbe96')) then
+         method='pbe'
+      elseif (xc_dftd4_native_names(name(1),name(2),
+     &                              'rpbe','cpbe96')) then
+         method='rpbe'
+      elseif (xc_dftd4_native_names(name(1),name(2),
+     &                              'revpbe','cpbe96')) then
+         method='revpbe'
+      elseif (xc_dftd4_native_names(name(1),name(2),
+     &                              'xperdew91','perdew91')) then
+         method='pw91'
+      elseif (xc_dftd4_native_names(name(1),name(2),
+     &                              'xperdew91','perdew86')) then
+         method='pwp'
+      elseif (xc_dftd4_native_names(name(1),name(2),
+     &                              'xperdew86','cpbe96')) then
+         method='pw86pbe'
+      elseif (xc_dftd4_native_names(name(1),name(2),'optx','lyp')) then
+         method='olyp'
+      elseif (xc_dftd4_native_names(name(1),name(2),
+     &                              'optx','cpbe96')) then
+         method='opbe'
+      elseif (xc_dftd4_native_names(name(1),name(2),
+     &                              'xtpss03','ctpss03')) then
+         method='tpss'
+      elseif (xc_dftd4_native_names(name(1),name(2),
+     &                              'xscan','cscan')) then
+         method='scan'
+      elseif (xc_dftd4_native_names(name(1),name(2),
+     &                              'xr2scan','cr2scan')) then
+         method='r2scan'
+      elseif (xc_dftd4_native_names(name(1),name(2),'xm06','cm06')) then
+         method='m06'
+      elseif (xc_dftd4_native_names(name(1),name(2),
+     &                              'xm06-l','cm06-l')) then
+         method='m06l'
+      elseif (xc_dftd4_native_names(name(1),name(2),
+     &                              'gill96','lyp')) then
+         method='glyp'
+      else
+         status=-1
+      endif
+      return
+      end
+
+      logical function xc_dftd4_native_names(name1,name2,xname,cname)
+      implicit none
+      character*(*) name1,name2,xname,cname
+      xc_dftd4_native_names=(
+     & (trim(name1).eq.trim(xname).and.trim(name2).eq.trim(cname)).or.
+     & (trim(name2).eq.trim(xname).and.trim(name1).eq.trim(cname)))
       return
       end
 

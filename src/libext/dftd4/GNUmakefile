@@ -9,11 +9,14 @@ DFTD4_ARCHIVES = $(DFTD4_LIBDIR)/libdftd4.a \
 	$(DFTD4_LIBDIR)/libmulticharge.a $(DFTD4_LIBDIR)/libmctc-lib.a \
 	$(DFTD4_LIBDIR)/libmstore.a
 DFTD4_BRIDGE = $(LIBDIR)/libnwc_dftd4.so
-DFTD4_STAMP = $(DFTD4_PREFIX)/.dftd4-$(DFTD4_VERSION)
+DFTD4_STAMP = $(DFTD4_PREFIX)/.dftd4-$(DFTD4_VERSION)-blas$(BLAS_SIZE)
 
 all: $(DFTD4_BRIDGE)
 
 $(DFTD4_STAMP): build_dftd4.sh
+	DFTD4_BLAS_SIZE="$(BLAS_SIZE)" \
+	DFTD4_BLAS_LIBRARIES="$(BLASOPT)" \
+	DFTD4_LAPACK_LIBRARIES="$(LAPACK_LIB)" \
 	./build_dftd4.sh $(DFTD4_VERSION) $(DFTD4_PREFIX)
 	@touch $@
 
@@ -21,7 +24,7 @@ $(DFTD4_BRIDGE): nw_dftd4.c nw_dftd4_params.F90 nw_dftd4.map $(DFTD4_STAMP)
 	$(CC) $(COPTIONS) -fPIC -I$(DFTD4_INCDIR) -c nw_dftd4.c -o nw_dftd4.o
 	$(FC) $(FOPTIONS) -fPIC -I$(DFTD4_MODULEDIR) -c nw_dftd4_params.F90 -o nw_dftd4_params.o
 	$(FC) -shared -o $@ nw_dftd4.o nw_dftd4_params.o -Wl,--whole-archive \
-	  $(DFTD4_ARCHIVES) -Wl,--no-whole-archive -llapack -lblas \
+	  $(DFTD4_ARCHIVES) -Wl,--no-whole-archive $(LAPACK_LIB) $(BLASOPT) \
 	  -Wl,-Bsymbolic -Wl,--exclude-libs,ALL \
 	  -Wl,--version-script=$(CURDIR)/nw_dftd4.map
 

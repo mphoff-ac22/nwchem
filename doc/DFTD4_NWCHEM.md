@@ -4,7 +4,7 @@
 
 This interface connects the popular DFTD4 (Version 4.2.0) dispersion corrections to molecular NWChem DFT energies, analytic gradients, and numerical Hessian corrections (and, concurrently, enables DFTD4 corrected geometry optimizations and harmonic vibrational frequency and normal-mode calculations). It calls the DFTD4 C API directly and does not start the `dftd4` command-line program.
 
-The interface recognizes supported named NWChem functionals and LibXC single functionals or exchange/correlation pairs. DFTD4 performs the final parameter lookup, so the interface follows the parameter set in its pinned release instead of maintaining a separate short allowlist. Bq centers are excluded from the DFTD4 structure and their derivative rows and columns remain zero. Existing `DISP` dispersion corrections cannot be combined with DFTD4, and this will trigger an error.
+The interface recognizes supported named NWChem functionals and native or LibXC exchange/correlation pairs. Native pairs with omitted coefficients use NWChem's default coefficient of 1.0; explicit pair coefficients must also both be 1.0. DFTD4 performs the final parameter lookup, so the interface follows the parameter set in its pinned release instead of maintaining a separate short allowlist. Bq centers are excluded from the DFTD4 structure and their derivative rows and columns remain zero. Existing `DISP` dispersion corrections cannot be combined with DFTD4, and this will trigger an error.
 
 The interface cannot make an electronic functional available when NWChem or LibXC cannot evaluate it, and will not work if the requested functional is not found within the DFTD4 library.
 
@@ -32,7 +32,7 @@ No external DFTD4 installation path is required. The build downloads the tagged 
 
 NWChem's tblite/XTB interface already links a bundled DFTD4 3.3.0 Fortran library. Replacing it with DFTD4 4.2.0 would break tblite's private ABI. The new build therefore creates `lib/LINUX64/libnwc_dftd4.so`, which statically contains the private 4.2.0 libraries and exports only `nw_dftd4_eval_`. A version script, hidden archive symbols, and `-Bsymbolic` prevent collisions with tblite's DFTD4 symbols.
 
-DFTD4 is built against LP64 LAPACK/BLAS. The bridge links its private DFTD4 dependency against LP64 libraries and isolates it from BLAS symbols linked into NWChem, including ILP64 implementations. The executable has a relative rpath to `../../lib/LINUX64`, so keep `bin/LINUX64/nwchem` and `lib/LINUX64/libnwc_dftd4.so` in their installed tree relationship.
+DFTD4 uses NWChem's selected BLAS/LAPACK libraries and follows `BLAS_SIZE`: `BLAS_SIZE=8` enables DFTD4's ILP64 interface, while `BLAS_SIZE=4` uses LP64. The bridge keeps its DFTD4 symbols private. The executable has a relative rpath to `../../lib/LINUX64`, so keep `bin/LINUX64/nwchem` and `lib/LINUX64/libnwc_dftd4.so` in their installed tree relationship.
 
 ## Input syntax
 
@@ -62,6 +62,8 @@ changing the ATM setting or its damping parameters.
 Named NWChem combinations are translated to DFTD4's canonical identifiers. The current mappings include B3LYP, B97, PBE0, TPSSh, MPW1B95, MPWB1K, B1B95, PW6B95, M06-L, M06, B97-D, BHLYP, B3P86, B3PW91, PBE, HSE03, SCAN, rSCAN, r2SCAN, omegaB97, omegaB97X-2008, MN12-SX, and r2SCAN0. A single native XC keyword is otherwise passed to DFTD4 for its own parameter lookup.
 
 LibXC selections are obtained from NWChem's LibXC adapter rather than from input-text guessing. Both composite functionals and supported exchange/correlation pairs are accepted. Pair order is normalized for DFTD4-supported combinations such as BLYP, BP86, PBE, PBEsol, TPSS, revTPSS, SCAN, rSCAN, r2SCAN, M06-L, and related GGAs. Each LibXC term must have unit weight; scaled or arbitrary mixtures are rejected because they do not identify a published DFTD4 parameterization.
+
+Supported native NWChem exchange/correlation pairs are normalized in the same way. For example, `xc xpbe96 cpbe96` and `xc xpbe96 1.0 cpbe96 1.0` select the same DFTD4 parameters as `xc pbe96`. Scaled native pairs are rejected.
 
 Examples are:
 
