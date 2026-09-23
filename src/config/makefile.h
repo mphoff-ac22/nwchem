@@ -305,6 +305,10 @@ ifdef USE_TBLITE
     NW_CORE_SUBDIRS += libext
 endif
 
+ifdef USE_DFTD4
+    NW_CORE_SUBDIRS += libext
+endif
+
 ifdef BUILD_OPENBLAS
     ifndef BLAS_SIZE
         BLAS_SIZE=8
@@ -3735,6 +3739,15 @@ ifdef USE_TBLITE
         EXTRA_LIBS += -ltblite -ltoml-f -ldftd4 -lmulticharge -ls-dftd3 -lmctc-lib
     endif
     EXTRA_LIBS += $(LAPACK_LIB) $(BLASOPT)
+endif
+
+# DFTD4.  Its symbols are isolated in libnwc_dftd4.so so this can coexist
+# with the older DFTD4 Fortran library required by tblite.
+ifdef USE_DFTD4
+    DEFINES += -DUSE_DFTD4
+    EXTRA_LIBS += -L$(LIBDIR) -lnwc_dftd4
+    LDOPTIONS += -Wl,-rpath,'$$ORIGIN/../../lib/$(TARGET)' \
+                 -Wl,--exclude-libs,libnwc_openblas.a
 endif
 
 # CUDA

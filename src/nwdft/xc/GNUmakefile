@@ -11,6 +11,10 @@ HEADERS = xc.fh xc_vdw.fh xc_params.fh xc_hcth.fh
 	xc_chkdispauto.o \
 	xc_vdw_init.o 2ndDerivB97.o 
 
+ifdef USE_DFTD4
+	OBJ += xc_dftd4.o
+endif
+
 	OBJ_OPTIMIZE = xc_eval_basis.o  \
 	a_dist.o \
 	eumac.o \
