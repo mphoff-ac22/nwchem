@@ -1,5 +1,10 @@
-c     DFTD4 interface developed with assistance from OpenAI Codex;
-c     implementation and numerical validation were reviewed by the author.
+c     DFTD4 interface developed with assistance from OpenAI Codex.
+c     Implementation and numerical validation were reviewed and tested by MPH.
+c     Validatation performed via tests varying processor count, S66 benchmarks
+c     against native DFTD4 command line interface with multiple functionals
+c     optimization + frequency tests against model systems (see dftd4 tests
+c     in QA/tests) against references (inquire MPH for details). 
+c     
       subroutine xc_dftd4(rtdb,geom,value,gradient,what)
       implicit none
 #include "errquit.fh"

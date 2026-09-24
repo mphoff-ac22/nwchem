@@ -538,6 +538,7 @@ c
      &   disp=.false.
       if(disp.or.xc_chkdispauto())
      &   call xc_vdw(rtdb,geom,dum,dbl_mb(k_frc_xc), 'forces')
+c DFTD4 Interface implemented with assistence from OpenAI Codex
 #ifdef USE_DFTD4
       if (.not.rtdb_get(rtdb,'dft:dftd4',mt_log,1,dftd4))
      &   dftd4=.false.

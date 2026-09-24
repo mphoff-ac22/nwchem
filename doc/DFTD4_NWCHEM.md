@@ -170,4 +170,4 @@ DFTD4 evaluation occurs only on Global Arrays rank zero; energy and gradient dat
 
 ## Development attribution
 
-This interface was developed with assistance from OpenAI Codex and subsequently reviewed and numerically validated by the author.
+This interface was developed with assistance from OpenAI Codex. All AI generated code was reviewed, validated, and tested by MPH.

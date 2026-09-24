@@ -1,6 +1,7 @@
 ! DFTD4 interface for NWChem.
-! Developed with assistance from OpenAI Codex; implementation and numerical
-! validation were reviewed by the author.
+! Developed with assistance from OpenAI Codex
+! Implementation and numerical validation
+! were reviewed and tested by MPH.
 subroutine nw_dftd4_get_params(name, values, status) bind(C)
   use, intrinsic :: iso_c_binding, only : c_char, c_double, c_int, c_null_char
   use dftd4, only : damping_param, rational_damping_param, &

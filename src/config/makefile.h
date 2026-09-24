@@ -3747,7 +3747,8 @@ ifdef USE_TBLITE
     EXTRA_LIBS += $(LAPACK_LIB) $(BLASOPT)
 endif
 
-# DFTD4 integration developed with assistance from OpenAI Codex.
+# DFTD4 integration developed with assistance from OpenAI Codex
+# Reviewed, validated, and tested by MPH
 ifdef USE_DFTD4
     DEFINES += -DUSE_DFTD4
     DFTD4_LIBDIR = $(NWCHEM_TOP)/src/libext/dftd4/install/lib

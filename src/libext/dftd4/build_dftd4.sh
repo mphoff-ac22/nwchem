@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # DFTD4 interface build for NWChem.
-# Developed with assistance from OpenAI Codex; integration and numerical
-# validation were reviewed by the author.
+# Developed with assistance from OpenAI Codex
+# integration and numerical validation were
+# reviewed and tested by MPH.
 
 set -euo pipefail
 
