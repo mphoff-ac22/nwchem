@@ -18,7 +18,7 @@ export USE_DFTD4=1
 
 Like `USE_LIBXC=1`, `USE_DFTD4=1` downloads a pinned source release and builds a private copy within `src/libext`. The default version is 4.2.0 and can be changed at build time with `DFTD4_VERSION`.
 
-Keep the existing MPI, Simint, LibXC, tblite/XTB, BLAS, and ScaLAPACK variables. A build uses:
+Keep the existing MPI, Simint, LibXC, BLAS, and ScaLAPACK variables. `USE_DFTD4` and `USE_TBLITE` are mutually exclusive because both interfaces provide incompatible DFTD4 libraries. A build uses:
 
 ```bash
 cd "$NWCHEM_TOP/src"
@@ -28,11 +28,11 @@ make
 
 No external DFTD4 installation path is required. The build downloads the tagged archive, lets DFTD4 fetch its pinned dependencies, and installs static libraries and headers under `src/libext/dftd4/install`.
 
-### Library isolation
+### Library linkage
 
-NWChem's tblite/XTB interface already links a bundled DFTD4 3.3.0 Fortran library. Replacing it with DFTD4 4.2.0 would break tblite's private ABI. The new build therefore creates `lib/LINUX64/libnwc_dftd4.so`, which statically contains the private 4.2.0 libraries and exports only `nw_dftd4_eval_`. A version script, hidden archive symbols, and `-Bsymbolic` prevent collisions with tblite's DFTD4 symbols.
+The build creates the static bridge archive `lib/LINUX64/libnwc_dftd4.a` and links it with the DFTD4 4.2.0 libraries installed under `src/libext/dftd4/install`. NWChem's tblite/XTB interface links a bundled DFTD4 3.3.0 library with conflicting symbols and a potentially incompatible ABI. The build therefore rejects configurations that enable both `USE_DFTD4` and `USE_TBLITE`.
 
-DFTD4 uses NWChem's selected BLAS/LAPACK libraries and follows `BLAS_SIZE`: `BLAS_SIZE=8` enables DFTD4's ILP64 interface, while `BLAS_SIZE=4` uses LP64. The bridge keeps its DFTD4 symbols private. The executable has a relative rpath to `../../lib/LINUX64`, so keep `bin/LINUX64/nwchem` and `lib/LINUX64/libnwc_dftd4.so` in their installed tree relationship.
+DFTD4 uses NWChem's selected BLAS/LAPACK libraries and follows `BLAS_SIZE`: `BLAS_SIZE=8` enables DFTD4's ILP64 interface, while `BLAS_SIZE=4` uses LP64. The static bridge requires no DFTD4-specific shared library or runtime RPATH.
 
 ## Input syntax
 
@@ -162,7 +162,7 @@ DFTD4 evaluation occurs only on Global Arrays rank zero; energy and gradient dat
 - `src/libext/dftd4/nw_dftd4.c`: narrow C API bridge and integer-width conversion.
 - `src/libext/dftd4/nw_dftd4_params.F90`: read-only access to the parameters loaded from the pinned DFTD4 module.
 - `src/libext/dftd4/build_dftd4.sh`: pinned source download and private CMake build.
-- `src/libext/dftd4/GNUmakefile`: dependency orchestration and isolated shared-library build.
+- `src/libext/dftd4/GNUmakefile`: dependency orchestration and static bridge-archive build.
 - `src/nwdft/xc/xc_dftd4.F`: functional mapping and energy, gradient, Bq, and Hessian handling.
 - `src/nwdft/libxc/nwchem_libxc_util.F`: LibXC functional-name handoff.
 - `src/nwdft/input_dft/dft_input.F`: `dftd4 on|off` parsing.

@@ -1,23 +1,14 @@
 echo
-start h2o_cl-_r2scan-d4
+start dftd4_h2o_cl-_r2scan-d4
 memory total 2000 mb noverify
 
 charge -1
 
 geometry units angstrom
- zmatrix
-  O
-  H 1 R1
-  H 1 R2 2 A1
-  Cl 1 R3 2 A2 3 D1
- variables
-  R1 0.971
-  R2 0.962
-  R3 2.908
-  A1 105.440
-  A2 5.835
-  D1 180.000
- end
+ O              -0.07129066     1.97245442     0.00000000
+ H              -0.15872200     0.97995339     0.00000000
+ H               0.88687129     2.06612395     0.00000000
+ Cl              0.10547891    -1.11056861     0.00000000
 end
 
 basis spherical
@@ -37,12 +28,5 @@ scf
  maxiter 99
 end
 
-driver
- tight
- eprec 1d-8
- maxiter 99
-end
-
-task dft optimize
 task dft freq
 
